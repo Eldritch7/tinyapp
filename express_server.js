@@ -5,6 +5,21 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
+const generateRandomString = function() {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+  let length = characters.length;
+  
+  let random = "";
+  for (let i = 0; i < 6; i++) {
+    random += characters.charAt(Math.floor(Math.random() *
+    length));
+  }
+  console.log(random);
+
+  return random;
+
+};
+generateRandomString();
 
 
 const urlDatabase = {
@@ -37,6 +52,11 @@ app.get("/hello", (req, res) => {
   const templateVars = {greeting: 'Hello World!'};
   res.render("hello_world", templateVars);
   //res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 //Will this work?? No it won't
