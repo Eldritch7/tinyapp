@@ -70,6 +70,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  //console.log("it works");
+  
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+
+});
+
 //Will this work?? No it won't
 /*app.get("/set", (req, res) => {
   const a = 1;
