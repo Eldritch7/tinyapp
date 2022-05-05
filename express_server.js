@@ -78,6 +78,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 });
 
+app.post("/urls/:shortURL", (req, res) => {
+//let new = req.body.longURL;
+//console.log(req.body);
+urlDatabase[req.params.shortURL] = req.body.longURL;
+res.redirect(`/urls/${req.params.shortURL}`);
+});
+// app.post("/urls/:shortURL/link", (req, res) => {
+//   res.redirect(`urls/${req.params.shortURL}`);
+// });
+
 //Will this work?? No it won't
 /*app.get("/set", (req, res) => {
   const a = 1;
