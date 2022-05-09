@@ -65,6 +65,11 @@ app.get("/hello", (req, res) => {
   //res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {username: req.cookies["username"]};
+  res.render("register", templateVars);
+})
+
 app.post("/urls/new", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let shortURL = generateRandomString();
@@ -102,6 +107,9 @@ app.post("/logout", (req, res) => {
 res.clearCookie("username");
 res.redirect(`/urls`);
 });
+// app.post("/register", (req, res) => {
+//   res.
+// })
 
 //Will this work?? No it won't
 /*app.get("/set", (req, res) => {
