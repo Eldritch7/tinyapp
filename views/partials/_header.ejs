@@ -5,11 +5,11 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+      <div class="navbar-nav ml-auto">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <ul class="nav navbar-nav navbar-right">
-        <% if (!username) {%>
+        <!-- <ul class="nav navbar-nav navbar-right"> -->
+        <% if (!user) {%>
         <form class="form-inline" method = "POST" action = "/login">
           <input class="form-control" type="text" name="username" placeholder="Enter Username">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
@@ -17,13 +17,13 @@
         <%} else {%>
 
         <span class="navbar-text">
-          <%=username%>
+          <%= user.email %>
         </span>
         <form class="form-inline" method = "POST" action = "/logout">
           <button type="submit" class="btn btn-outline-light">Logout</button>
         </form>
         <% } %>
-        </ul>
+        <!-- </ul> -->
       </div>
     </div>
   </nav>

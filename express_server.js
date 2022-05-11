@@ -30,23 +30,44 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: req.cookies["user"]
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
+  const templateVars = {
+    user: req.cookies["user"]
+  };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  const templateVars = {
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL], 
+    user: req.cookies["user"]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -66,9 +87,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
+  const templateVars = {user: req.cookies["user"]};
   res.render("register", templateVars);
-})
+});
 
 app.post("/urls/new", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
@@ -97,19 +118,27 @@ res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.post("/login", (req, res) => {
-const cookie = req.body.username;
+const user = req.body.username;
 //console.log(cookie);
-res.cookie("username", cookie);
+res.cookie("user", user);
 res.redirect(`/urls`);
 });
 
 app.post("/logout", (req, res) => {
-res.clearCookie("username");
+res.clearCookie("user");
 res.redirect(`/urls`);
 });
-// app.post("/register", (req, res) => {
-//   res.
-// })
+app.post("/register", (req, res) => {
+  const {email, password} = req.body;
+  //console.log(email, password);
+  const userId = generateRandomString();
+  users[userId] = {userId, email, password};
+  console.log(users);
+ 
+  res.cookie("user", users[userId]);
+  res.redirect("/urls");
+  
+});
 
 //Will this work?? No it won't
 /*app.get("/set", (req, res) => {
