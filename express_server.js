@@ -1,3 +1,4 @@
+//Server Setup
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -5,10 +6,13 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
 
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
+
+//Functions
+
 const generateRandomString = function() {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let length = characters.length;
@@ -18,7 +22,7 @@ const generateRandomString = function() {
     random += characters.charAt(Math.floor(Math.random() *
     length));
   }
-  //console.log(random);
+  
 
   return random;
 
@@ -32,6 +36,7 @@ const emailLookup = function(email, userVar) {
     }
   } return false;
 };
+
 const emailIdlookup = function(email, userVar) {
   for (let user in userVar) {
     
@@ -41,28 +46,28 @@ const emailIdlookup = function(email, userVar) {
   } return false;
 };
 
-
+//Server Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
-console.log(emailLookup("user@example.com", users));
 
+//Rendered Pages
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -100,7 +105,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   const templateVars = {greeting: 'Hello World!'};
   res.render("hello_world", templateVars);
-  //res.send("<html><body>Hello <b>World</b></body></html>\n");
+  
 });
 
 app.get("/register", (req, res) => {
@@ -116,19 +121,22 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+
+//Post Requests
+
 app.post("/urls/new", (req, res) => {
-  //console.log(req.body);  // Log the POST request body to the console
+  
   let shortURL = generateRandomString();
   let long = req.body.longURL;
-  //console.log("short", short, "long", long);
+  
   urlDatabase[shortURL] = long;
-  //console.log(urlDatabase);
+  
 
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  //console.log("it works");
+  
   
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
@@ -136,39 +144,31 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-//let new = req.body.longURL;
-//console.log(req.body);
-urlDatabase[req.params.shortURL] = req.body.longURL;
-res.redirect(`/urls/${req.params.shortURL}`);
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.post("/login", (req, res) => {
-const {email, password} = req.body;
-if (emailLookup(email, users) === password) {
-  const userId = emailIdlookup(email, users);
-  console.log(userId);
-res.cookie("user", users[userId]);
-res.redirect(`/urls`);
-} else if (!(emailLookup(email, users))) {
-  res.redirect(403, "/register");
-} else if ((email, users) !== password) {
-  res.redirect(403, "/login");
-}
-//console.log(user, password);
-//console.log(cookie);
-// res.cookie("user", user);
-// res.redirect(`/urls`);
+  const {email, password} = req.body;
+  if (emailLookup(email, users) === password) {
+    const userId = emailIdlookup(email, users);
+    console.log(userId);
+    res.cookie("user", users[userId]);
+    res.redirect(`/urls`);
+  } else if (!(emailLookup(email, users))) {
+    res.redirect(403, "/register");
+  } else if ((email, users) !== password) {
+    res.redirect(403, "/login");
+  }
+
 });
 
 app.post("/logout", (req, res) => {
-res.clearCookie("user");
-res.redirect(`/urls`);
+  res.clearCookie("user");
+  res.redirect(`/urls`);
 });
 
-// app.post("/login", (req, res) => {
-//   const {email, password} = req.body;
-  
-// });
+
 
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
@@ -197,15 +197,7 @@ app.post("/register", (req, res) => {
   
 });
 
-//Will this work?? No it won't
-/*app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
- 
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-}); */
+
 
 
 app.listen(PORT, () => {
