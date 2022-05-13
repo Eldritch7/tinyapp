@@ -26,13 +26,20 @@ const generateRandomString = function() {
 
 const emailLookup = function(email, userVar) {
   for (let user in userVar) {
-    console.log(user);
+   
     if (userVar[user].email === email) {
-      return true;
+      return userVar[user].password;
     }
   } return false;
 };
-
+const emailIdlookup = function(email, userVar) {
+  for (let user in userVar) {
+    
+    if (userVar[user].email === email) {
+      return user;
+    }
+  } return false;
+};
 
 
 const urlDatabase = {
@@ -97,17 +104,25 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {user: req.cookies["user"]};
+  const templateVars = {
+    user: req.cookies["user"]
+  };
   res.render("register", templateVars);
+});
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: req.cookies["user"]
+  };
+  res.render("login", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  //console.log(req.body);  // Log the POST request body to the console
   let shortURL = generateRandomString();
   let long = req.body.longURL;
   //console.log("short", short, "long", long);
   urlDatabase[shortURL] = long;
-  console.log(urlDatabase);
+  //console.log(urlDatabase);
 
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 });
@@ -128,20 +143,37 @@ res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.post("/login", (req, res) => {
-const user = req.body.username;
-//console.log(cookie);
-res.cookie("user", user);
+const {email, password} = req.body;
+if (emailLookup(email, users) === password) {
+  const userId = emailIdlookup(email, users);
+  console.log(userId);
+res.cookie("user", users[userId]);
 res.redirect(`/urls`);
+} else if (!(emailLookup(email, users))) {
+  res.redirect(403, "/register");
+} else if ((email, users) !== password) {
+  res.redirect(403, "/login");
+}
+//console.log(user, password);
+//console.log(cookie);
+// res.cookie("user", user);
+// res.redirect(`/urls`);
 });
 
 app.post("/logout", (req, res) => {
 res.clearCookie("user");
 res.redirect(`/urls`);
 });
+
+// app.post("/login", (req, res) => {
+//   const {email, password} = req.body;
+  
+// });
+
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
   console.log(emailLookup(email, users));
-  if (emailLookup(email, users) === true) {
+  if (emailLookup(email, users)) {
     res.redirect(400, "/register");
    
   } else if (email === "" || password === "") {

@@ -8,12 +8,15 @@
       <div class="navbar-nav ml-auto">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <!-- <ul class="nav navbar-nav navbar-right"> -->
+        
+
         <% if (!user) {%>
-        <form class="form-inline" method = "POST" action = "/login">
+          <a class="nav-item nav-link" href="/Register">Register</a>
+          <a class="nav-item nav-link" href="/login">Login</a>
+        <!-- <form class="form-inline" method = "POST" action = "/login">
           <input class="form-control" type="text" name="username" placeholder="Enter Username">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
-        </form>
+        </form> -->
         <%} else {%>
 
         <span class="navbar-text">
