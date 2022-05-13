@@ -23,7 +23,16 @@ const generateRandomString = function() {
   return random;
 
 };
-//generateRandomString();
+
+const emailLookup = function(email, userVar) {
+  for (let user in userVar) {
+    console.log(user);
+    if (userVar[user].email === email) {
+      return true;
+    }
+  } return false;
+};
+
 
 
 const urlDatabase = {
@@ -41,15 +50,16 @@ const users = {
     email: "user2@example.com", 
     password: "dishwasher-funk"
   }
-}
+};
+console.log(emailLookup("user@example.com", users));
 
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 app.get("/urls", (req, res) => {
-  const templateVars = { 
-    urls: urlDatabase, 
+  const templateVars = {
+    urls: urlDatabase,
     user: req.cookies["user"]
   };
   res.render("urls_index", templateVars);
@@ -130,13 +140,28 @@ res.redirect(`/urls`);
 });
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
-  //console.log(email, password);
-  const userId = generateRandomString();
-  users[userId] = {userId, email, password};
-  console.log(users);
+  console.log(emailLookup(email, users));
+  if (emailLookup(email, users) === true) {
+    res.redirect(400, "/register");
+   
+  } else if (email === "" || password === "") {
+    res.send(400, "E-mail or password empty");
+  } else {
+    const userId = generateRandomString();
+    users[userId] = {
+      userId,
+      email,
+      password
+    };
+   
+   
+    res.cookie("user", users[userId]);
+    res.redirect("/urls");
+
+  }
  
-  res.cookie("user", users[userId]);
-  res.redirect("/urls");
+  
+
   
 });
 
