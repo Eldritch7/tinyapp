@@ -48,9 +48,23 @@ const emailIdlookup = function(email, userVar) {
 
 //Server Database
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userId: "user2RandomID"
+  },
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -87,26 +101,46 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params['shortURL']]["longURL"],
     user: req.cookies["user"]
   };
+  
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(`${longURL}`);
+  
+  const shortURL = req.params.shortURL;
+  const shortUrlCheck = function() {
+    for (let url in urlDatabase) {
+      console.log(url);
+      if (url === shortURL) {
+        return true;
+  
+      }
+      
+    
+    }
+    return false;
+
+  };
+  if (shortUrlCheck()) {
+    const longURL = urlDatabase[req.params.shortURL]["longURL"];
+    res.redirect(`${longURL}`);
+
+  } else {
+    res.status(400).send("shortURL not found in Database.");
+  }
+  
+  
+  
+  
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  const templateVars = {greeting: 'Hello World!'};
-  res.render("hello_world", templateVars);
-  
-});
 
 app.get("/register", (req, res) => {
   const templateVars = {
@@ -125,14 +159,36 @@ app.get("/login", (req, res) => {
 //Post Requests
 
 app.post("/urls/new", (req, res) => {
+  const cookie = req.cookies["user"];
+  console.log(cookie);
+  if (!cookie) {
+    res.redirect("/login");
+  } else if (cookie) {
+    const userId = req.cookies["user"]["userId"];
+    const email = req.cookies["user"]["email"];
+    
+    if (emailIdlookup(email, users) === userId) {
+      console.log("Hello from in the loop!", "userID", userId);
+      let shortURL = generateRandomString();
+      let long = req.body.longURL;
+      
+      
+      urlDatabase[shortURL] = {
+        "longURL": long,
+        "userID": userId,
+      };
+      console.log(urlDatabase);
+     
+    
+      
+    
+      res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
   
-  let shortURL = generateRandomString();
-  let long = req.body.longURL;
-  
-  urlDatabase[shortURL] = long;
-  
+    }
 
-  res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
+  
+    
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -144,7 +200,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[req.params.shortURL] = {longURL: req.body.longURL};
+  console.log(urlDatabase);
+  
+ 
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
@@ -176,7 +235,7 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   const {email, password} = req.body;
-  console.log(emailLookup(email, users));
+ 
   if (emailLookup(email, users)) {
     res.status(400).send("E-mail already registered");
     
