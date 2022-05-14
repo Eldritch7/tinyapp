@@ -86,8 +86,8 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL], 
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
     user: req.cookies["user"]
   };
   res.render("urls_show", templateVars);
@@ -156,9 +156,13 @@ app.post("/login", (req, res) => {
     res.cookie("user", users[userId]);
     res.redirect(`/urls`);
   } else if (!(emailLookup(email, users))) {
-    res.redirect(403, "/register");
-  } else if ((email, users) !== password) {
-    res.redirect(403, "/login");
+    res.status(403).send("User Not Found.");
+    //res.redirect(403, "/register");
+  } else if (emailLookup(email, users) !== password) {
+    res.status(403).send("Incorrect Password");
+
+  
+
   }
 
 });
@@ -174,10 +178,12 @@ app.post("/register", (req, res) => {
   const {email, password} = req.body;
   console.log(emailLookup(email, users));
   if (emailLookup(email, users)) {
-    res.redirect(400, "/register");
+    res.status(400).send("E-mail already registered");
+    
    
   } else if (email === "" || password === "") {
-    res.send(400, "E-mail or password empty");
+    res.status(400).send("E-mail or Password Empty");
+    
   } else {
     const userId = generateRandomString();
     users[userId] = {
