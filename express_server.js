@@ -50,7 +50,7 @@ const emailIdlookup = function(email, userVar) {
 const urlDatabase = {
   b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
-    userId: "user2RandomID"
+    userID: "userRandomID"
   },
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -84,11 +84,42 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    user: req.cookies["user"]
-  };
-  res.render("urls_index", templateVars);
+
+  const cookie = req.cookies["user"];
+  if (!cookie) {
+    res.send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b></body></html>\n`);
+  } else if (cookie) {
+   
+    const userId = req.cookies["user"]["id"];
+    const email = req.cookies["user"]["email"];
+    const filteredUrls = {};
+    const keys = Object.keys(urlDatabase);
+
+    keys.forEach((key) => {
+      console.log("length", keys.length);
+
+      
+      console.log("key", key);
+      let innerKeys = urlDatabase[key];
+      
+      if (userId === innerKeys["userID"]) {
+        
+        filteredUrls[key] = innerKeys;
+      }
+
+    
+     
+
+     
+    
+
+    });
+    const templateVars = {
+      urls: filteredUrls,
+      user: req.cookies["user"]
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -99,13 +130,32 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params['shortURL']]["longURL"],
-    user: req.cookies["user"]
-  };
+  const cookie = req.cookies["user"];
+  const shortURL = req.params.shortURL;
+  console.log(shortURL);
+  if (!cookie) {
+    res.status(400).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a>.</h1></b></body></html>\n`);
+
+    
+  } else if (!urlDatabase[shortURL]) {
+    res.status(400).send(`<html><body><h1>Does not Exist.</a></h1></b>\n<a href = '/urls'>Index<a></body></html>\n`);
+   
+
+  } else if (cookie["id"] !== urlDatabase[shortURL]["userID"]) {
+    res.status(400).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a>.</h1></b>\nOtherwise this may not be your link.</body></html>\n`);
+  } else {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params['shortURL']]["longURL"],
+      user: req.cookies["user"]
+    };
+    
+    res.render("urls_show", templateVars);
+
+  }
+   
   
-  res.render("urls_show", templateVars);
+  
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -113,7 +163,7 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const shortUrlCheck = function() {
     for (let url in urlDatabase) {
-      console.log(url);
+      
       if (url === shortURL) {
         return true;
   
@@ -164,7 +214,7 @@ app.post("/urls/new", (req, res) => {
   if (!cookie) {
     res.redirect("/login");
   } else if (cookie) {
-    const userId = req.cookies["user"]["userId"];
+    const userId = req.cookies["user"]["id"];
     const email = req.cookies["user"]["email"];
     
     if (emailIdlookup(email, users) === userId) {
@@ -177,7 +227,7 @@ app.post("/urls/new", (req, res) => {
         "longURL": long,
         "userID": userId,
       };
-      console.log(urlDatabase);
+      // console.log(urlDatabase);
      
     
       
@@ -192,19 +242,52 @@ app.post("/urls/new", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const cookie = req.cookies["user"];
+  const shortURL = req.params.shortURL;
+  if (!urlDatabase[shortURL]) {
+    res.status(400).send(`<html><body><h1>2Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nDoes Not Exist.</body></html>\n`);
   
   
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  
+  }  else if (!cookie) {
+    res.status(403).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
+   
+  } else if (cookie["id"] !== urlDatabase[shortURL]["userID"]) {
+    res.status(403).send(`<html><body><h1>2Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
+  
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+
+  }
+  
+  
 
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const cookie = req.cookies["user"];
+  const shortURL = req.params.shortURL;
+  if (!urlDatabase[shortURL]) {
+    
+    res.status(400).send(`<html><body><h1>Does not Exist.</h1></b>\n<a href = '/urls'>Index<a></body></html>\n`);
+  
+  
+  
+  }  else if (!cookie) {
+    res.status(403).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
+   
+  } else if (cookie["id"] !== urlDatabase[shortURL]["userID"]) {
+    res.status(403).send(`<html><body><h1>2Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
+  
+  } else {
+  //edit
   urlDatabase[req.params.shortURL] = {longURL: req.body.longURL};
   console.log(urlDatabase);
   
  
   res.redirect(`/urls/${req.params.shortURL}`);
+  }
 });
 
 app.post("/login", (req, res) => {
@@ -228,7 +311,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user");
-  res.redirect(`/urls`);
+  res.redirect(`/login`);
 });
 
 
@@ -246,10 +329,11 @@ app.post("/register", (req, res) => {
   } else {
     const userId = generateRandomString();
     users[userId] = {
-      userId,
+      id : userId,
       email,
       password
     };
+    console.log(users[userId]);
    
    
     res.cookie("user", users[userId]);
