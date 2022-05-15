@@ -4,6 +4,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 
 app.use(cookieParser());
@@ -290,9 +291,12 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
+// bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); // returns true
+// bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); // returns false
+
 app.post("/login", (req, res) => {
   const {email, password} = req.body;
-  if (emailLookup(email, users) === password) {
+  if (bcrypt.compareSync(password, (emailLookup(email, users)))) {
     const userId = emailIdlookup(email, users);
     console.log(userId);
     res.cookie("user", users[userId]);
@@ -300,7 +304,7 @@ app.post("/login", (req, res) => {
   } else if (!(emailLookup(email, users))) {
     res.status(403).send("User Not Found.");
     //res.redirect(403, "/register");
-  } else if (emailLookup(email, users) !== password) {
+  } else if (!bcrypt.compareSync(password, (emailLookup(email, users)))) {
     res.status(403).send("Incorrect Password");
 
   
@@ -314,6 +318,11 @@ app.post("/logout", (req, res) => {
   res.redirect(`/login`);
 });
 
+// const password = "purple-monkey-dinosaur"; // found in the req.params object
+// const hashedPassword = bcrypt.hashSync(password, 10);
+// Instruction
+// bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); // returns true
+// bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); // returns false
 
 
 app.post("/register", (req, res) => {
@@ -328,10 +337,11 @@ app.post("/register", (req, res) => {
     
   } else {
     const userId = generateRandomString();
+    const hashedPassword = bcrypt.hashSync(password, 10);
     users[userId] = {
       id : userId,
       email,
-      password
+      password : hashedPassword
     };
     console.log(users[userId]);
    
