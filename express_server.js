@@ -5,7 +5,10 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
+
+
+const emailIdlookup = require("./helpers");
 
 
 app.use(cookieSession({
@@ -46,14 +49,7 @@ const emailLookup = function(email, userVar) {
   } return false;
 };
 
-const emailIdlookup = function(email, userVar) {
-  for (let user in userVar) {
-    
-    if (userVar[user].email === email) {
-      return user;
-    }
-  } return false;
-};
+
 
 //Server Database
 const urlDatabase = {
@@ -255,7 +251,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const user = req.session.user;
   const shortURL = req.params.shortURL;
   if (!urlDatabase[shortURL]) {
-    res.status(400).send(`<html><body><h1>2Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nDoes Not Exist.</body></html>\n`);
+    res.status(400).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nDoes Not Exist.</body></html>\n`);
   
   
   
@@ -263,7 +259,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     res.status(403).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
    
   } else if (user["id"] !== urlDatabase[shortURL]["userID"]) {
-    res.status(403).send(`<html><body><h1>2Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
+    res.status(403).send(`<html><body><h1>Please <a href="/login">Login </a> or <a href="/register">Register</a></h1></b>\nYou do not have permission to delete this.</body></html>\n`);
   
   } else {
     delete urlDatabase[req.params.shortURL];
