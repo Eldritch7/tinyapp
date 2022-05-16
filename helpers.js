@@ -1,3 +1,4 @@
+//Function returns a user ID when given an email, if that email is registered
 const emailIdlookup = function(email, userVar) {
   for (let user in userVar) {
     
@@ -6,5 +7,7 @@ const emailIdlookup = function(email, userVar) {
     }
   } return false;
 };
+
+
 
 module.exports = emailIdlookup;
